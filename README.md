@@ -7,7 +7,8 @@
 ### Clean Code Principles Applied
 
 - **Separation of Concerns:**  
-  The application is organized into three primary layers:
+  The application is organized into four primary layers:
+    - **Model Layer:** Represents the application's data structure. In this case, the Product class encapsulates product details such as `productId`, `productName`, and `productQuantity`. This layer serves as a blueprint for product entities.
     - **Controller Layer:** Handles HTTP requests and manages interactions with the web client.
     - **Service Layer:** Contains business logic and acts as an intermediary between the Controller and Repository.
     - **Repository Layer:** Manages data access (here, using an in-memory `List` for demonstration).
