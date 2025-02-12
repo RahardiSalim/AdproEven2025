@@ -41,6 +41,18 @@ public class ProductRepository {
         return null;
     }
 
+    // Delete an existing product
+    public void delete(String productId) {
+        Iterator<Product> iterator = productData.iterator();
+        while (iterator.hasNext()) {
+            Product product = iterator.next();
+            if (product.getProductId().equals(productId)) {
+                iterator.remove();
+                return;
+            }
+        }
+    }
+
     public Iterator<Product> findAll() {
         return productData.iterator();
     }
