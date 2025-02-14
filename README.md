@@ -53,3 +53,28 @@
 
 - **Logging:**  
   Adding a logging framework (e.g., SLF4J with Logback) would improve the ability to trace and debug issues. It is important to ensure that sensitive information is not logged, in line with secure coding practices.
+
+## Exercise 2
+
+After writing the unit tests, I feel more confident in the robustness of our codebase. However, I also recognize that unit tests are just one part of a quality assurance strategy. Here are some of my thoughts and insights:
+
+### Unit Testing and Code Coverage
+- **Quantity of Unit Tests:**  
+  There is no fixed number of unit tests per class. Instead, tests should cover every meaningful scenario: normal behavior, edge cases, and error conditions. Each public method or significant piece of logic should have tests verifying its behavior. This may mean one or several tests per method depending on complexity.
+
+- **Ensuring Sufficient Tests:**  
+  Code coverage tools (like JaCoCo) help us understand which parts of our source code are exercised by our tests. However, achieving 100% code coverage does not guarantee that the code is bug-free; it only indicates that every line is executed during testing. Quality tests should also assert that the correct outcomes occur under various conditions.
+
+### Reflections on Creating Additional Functional Test Suites
+- **Test Code Duplication:**  
+  Suppose we create another functional test suite to verify the number of items in the product list using a similar setup and instance variables as in `CreateProductFunctionalTest.java`. This approach might lead to duplicate code. Repeating setup procedures and instance variables across multiple test classes violates the DRY (Don't Repeat Yourself) principle and can reduce code quality.
+
+- **Potential Clean Code Issues:**
+  - **Duplication:** Repeating the same setup code in multiple test classes can make maintenance harder. If a change is needed, it has to be replicated everywhere.
+  - **Poor Abstraction:** Common functionalities, such as initializing the base URL and the WebDriver, should be abstracted into a shared base class or utility method.
+  - **Readability:** Test suites should be concise and focused on what they verify. Boilerplate code that is repeated across tests distracts from the actual test logic.
+
+- **Possible Improvements:**
+  - **Refactoring Common Setup:** Move shared setup procedures (e.g., initializing the base URL, WebDriver configuration, etc.) into a common base test class. This reduces redundancy and makes tests easier to manage.
+  - **Parameterized Tests:** For scenarios where the same test logic applies to multiple input values (e.g., verifying different numbers of items), parameterized tests can help reduce duplication.
+  - **Clear Naming Conventions:** Ensure test methods and classes are named clearly to indicate what behavior they verify.
