@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +22,10 @@ class ProductRepositoryTest {
     void setUp() {
         productRepository = new ProductRepository(); // Ensure fresh repository for each test
     }
+
+    // ---------------------------------------------------------------------------------
+    // Existing tests
+    // ---------------------------------------------------------------------------------
 
     @Test
     void testCreateAndFind() {
@@ -170,4 +175,214 @@ class ProductRepositoryTest {
         assertEquals("id-2", productIterator.next().getProductId());
         assertFalse(productIterator.hasNext());
     }
+
+    // ---------------------------------------------------------------------------------
+    // Additional Edge Cases for 100% Coverage
+    // ---------------------------------------------------------------------------------
+
+    @Test
+    void testCreateProductWithNullId_ShouldGenerateNewId() {
+        Product product = new Product();
+        // productId is null by default
+        product.setProductName("No ID Product");
+        product.setProductQuantity(10);
+
+        Product created = productRepository.create(product);
+        assertNotNull(created.getProductId(), "Should generate a new ID if productId is null");
+        assertFalse(created.getProductId().isEmpty());
+    }
+
+    @Test
+    void testCreateProductWithEmptyId_ShouldGenerateNewId() {
+        Product product = new Product();
+        product.setProductId(""); // Explicitly empty
+        product.setProductName("Empty ID Product");
+        product.setProductQuantity(10);
+
+        Product created = productRepository.create(product);
+        assertNotNull(created.getProductId(), "Should generate a new ID if productId is empty");
+        assertFalse(created.getProductId().isEmpty());
+    }
+
+    @Test
+    void testFindByIdWithNullId_ShouldThrowException() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.findById(null);
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testFindByIdWithEmptyId_ShouldThrowException() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.findById("");
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithNullId_ShouldThrowException() {
+        Product product = new Product();
+        // productId is null by default
+        product.setProductName("No ID on Update");
+        product.setProductQuantity(5);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(product);
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithEmptyId_ShouldThrowException() {
+        Product product = new Product();
+        product.setProductId("");
+        product.setProductName("Empty ID on Update");
+        product.setProductQuantity(5);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(product);
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithEmptyName_ShouldThrowException() {
+        Product product = new Product();
+        product.setProductId("will-fail-id");
+        product.setProductName("Original");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        Product updated = new Product();
+        updated.setProductId("will-fail-id");
+        updated.setProductName("");
+        updated.setProductQuantity(10);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(updated);
+        });
+        assertEquals("Product name cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithNegativeQuantity_ShouldThrowException() {
+        Product product = new Product();
+        product.setProductId("negative-quantity-id");
+        product.setProductName("Original Product");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        Product updated = new Product();
+        updated.setProductId("negative-quantity-id");
+        updated.setProductName("Negative Product");
+        updated.setProductQuantity(-5);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(updated);
+        });
+        assertEquals("Product quantity cannot be negative.", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteWithNullId_ShouldThrowException() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.delete(null);
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteWithEmptyId_ShouldThrowException() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.delete("");
+        });
+        assertEquals("Product ID cannot be empty.", exception.getMessage());
+    }
+    @Test
+    void testFindById_NonEmptyListNoMatch_ShouldThrowException() {
+        // Create a product with a different ID
+        Product product = new Product();
+        product.setProductId("some-id");
+        product.setProductName("some product");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        // Attempt to find a non-matching ID
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.findById("other-id");
+        });
+        assertEquals("Product with ID other-id not found.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateNonExistentProductInNonEmptyList_ShouldThrowException() {
+        // Create a product in the repository
+        Product existing = new Product();
+        existing.setProductId("existing-id");
+        existing.setProductName("existing product");
+        existing.setProductQuantity(10);
+        productRepository.create(existing);
+
+        // Try to update a different ID
+        Product updated = new Product();
+        updated.setProductId("another-id");
+        updated.setProductName("new name");
+        updated.setProductQuantity(20);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(updated);
+        });
+        assertEquals("Cannot update: Product with ID another-id not found.", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteNonExistentProductInNonEmptyList_ShouldThrowException() {
+        // Create a product in the repository
+        Product product = new Product();
+        product.setProductId("some-id");
+        product.setProductName("some name");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        // Try to delete a different ID
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.delete("another-id");
+        });
+        assertEquals("Cannot delete: Product with ID another-id not found.", exception.getMessage());
+    }
+    @Test
+    void testCreateProductWithNullName_ShouldThrowException() {
+        Product product = new Product();
+        product.setProductId("some-id");
+        product.setProductName(null); // testing null product name
+        product.setProductQuantity(10);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.create(product);
+        });
+        assertEquals("Product name cannot be empty.", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateProductWithNullName_ShouldThrowException() {
+        // First, create a product with a valid name.
+        Product product = new Product();
+        product.setProductId("test-id");
+        product.setProductName("Original Name");
+        product.setProductQuantity(10);
+        productRepository.create(product);
+
+        // Now, attempt to update the product with a null name.
+        Product updated = new Product();
+        updated.setProductId("test-id");
+        updated.setProductName(null); // testing null name for update
+        updated.setProductQuantity(10);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            productRepository.update(updated);
+        });
+        assertEquals("Product name cannot be empty.", exception.getMessage());
+    }
+
 }
