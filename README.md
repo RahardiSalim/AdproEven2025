@@ -78,3 +78,16 @@ After writing the unit tests, I feel more confident in the robustness of our cod
   - **Refactoring Common Setup:** Move shared setup procedures (e.g., initializing the base URL, WebDriver configuration, etc.) into a common base test class. This reduces redundancy and makes tests easier to manage.
   - **Parameterized Tests:** For scenarios where the same test logic applies to multiple input values (e.g., verifying different numbers of items), parameterized tests can help reduce duplication.
   - **Clear Naming Conventions:** Ensure test methods and classes are named clearly to indicate what behavior they verify.
+
+# Tutorial 2 
+
+## Exercise 2
+
+### Code Quality Issues Fixed
+During this exercise, I addressed several code quality issues detected by Scorecard, PMD, and other tools. For instance:
+- **Token-Permissions and Pinned-Dependencies:** I updated my GitHub Actions workflows to use strict token permissions and pinned dependencies to specific commits, ensuring a more secure and predictable build process.
+- **Unused Imports and Unnecessary Modifiers:** I removed unused imports (e.g., the wildcard import in the controller) and unnecessary 'public' modifiers in interface methods, which improved the readability and cleanliness of the code.
+- **Visibility of Utility Classes:** I made adjustments to utility classes so that constructors are non-private (when needed for testing), while still keeping the code design sound. Additionally, I resolved issues flagged around dependency update tools and security-policy by ensuring the appropriate license and security documents are in place.
+
+### CI/CD Pipeline Reflection
+I believe that the current implementation meets the core definitions of Continuous Integration and Continuous Deployment. My workflows automatically run a full suite of tests and perform static code analysis for every push to the default branch, which ensures that any code changes are integrated and validated as soon as possible. The deployment process is automated, meaning that successful builds trigger a redeployment of the application to a PaaS environment without manual intervention, which greatly reduces the risk of human error. Additionally, the inclusion of security scans and dependency checks in the pipeline reinforces the overall quality and stability of the codebase. The process is designed to catch issues early in the development cycle, and the clear feedback provided by the CI/CD pipeline helps maintain a high standard of code quality. Moreover, the integration of best practices like token permission restrictions and pinned dependencies adds an extra layer of security to the deployment process. Overall, this robust CI/CD setup not only accelerates the delivery cycle but also enhances the reliability and maintainability of the application.
