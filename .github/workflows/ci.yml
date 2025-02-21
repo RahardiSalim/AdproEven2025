@@ -1,4 +1,6 @@
 name: Continuous Integration (CI)
+permissions:
+  contents: read
 
 ## Run CI jobs on all branches by default
 on:
