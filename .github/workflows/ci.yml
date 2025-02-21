@@ -22,7 +22,3 @@ jobs:
         run: chmod +x gradlew
       - name: Run unit tests
         run: ./gradlew test
-
-permissions:
-  contents: read
-  actions: read
