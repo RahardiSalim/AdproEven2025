@@ -81,9 +81,11 @@ After writing the unit tests, I feel more confident in the robustness of our cod
 
 # Tutorial 2 
 
+## Link Website : yeasty-misha-rahardisalim-1e64a615.koyeb.app/
+
 ## Exercise 2
 
-### Code Quality Issues Fixed
+### Code Quality Issues Fixed (22/28 solve)
 During this exercise, I addressed several code quality issues detected by Scorecard, PMD, and other tools. For instance:
 - **Token-Permissions and Pinned-Dependencies:** I updated my GitHub Actions workflows to use strict token permissions and pinned dependencies to specific commits, ensuring a more secure and predictable build process.
 - **Unused Imports and Unnecessary Modifiers:** I removed unused imports (e.g., the wildcard import in the controller) and unnecessary 'public' modifiers in interface methods, which improved the readability and cleanliness of the code.
