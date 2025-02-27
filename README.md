@@ -93,3 +93,63 @@ During this exercise, I addressed several code quality issues detected by Scorec
 
 ### CI/CD Pipeline Reflection
 I believe that the current implementation meets the core definitions of Continuous Integration and Continuous Deployment. My workflows automatically run a full suite of tests and perform static code analysis for every push to the default branch, which ensures that any code changes are integrated and validated as soon as possible. The deployment process is automated, meaning that successful builds trigger a redeployment of the application to a PaaS environment without manual intervention, which greatly reduces the risk of human error. Additionally, the inclusion of security scans and dependency checks in the pipeline reinforces the overall quality and stability of the codebase. The process is designed to catch issues early in the development cycle, and the clear feedback provided by the CI/CD pipeline helps maintain a high standard of code quality. Moreover, the integration of best practices like token permission restrictions and pinned dependencies adds an extra layer of security to the deployment process. Overall, this robust CI/CD setup not only accelerates the delivery cycle but also enhances the reliability and maintainability of the application.
+
+# Tutorial 3
+
+## Exercise
+
+### Code Changes
+To better adhere to SOLID principles, the following changes have been implemented in the Car-related components of the application:
+
+1. **Single Responsibility Principle (SRP):**
+  - **Before:** The `CarController` extended `ProductController`, causing a mix of responsibilities between two distinct domains (Products and Cars).
+  - **After:** `CarController` is now independent, handling only operations related to the `Car` entity. This ensures that each controller has only one reason to change.
+
+2. **Open/Closed Principle (OCP):**
+  - By using service interfaces (e.g., `CarService`), the code is open for extension (new functionalities can be added by implementing these interfaces) while remaining closed for modification (existing classes remain unchanged).
+  - New features or entities can be added by creating new implementations without altering the core logic.
+
+3. **Liskov Substitution Principle (LSP):**
+  - With the removal of inheritance between `CarController` and `ProductController`, controllers can be substituted or extended without affecting the overall behavior of the application.
+  - Each controller now independently fulfills its contract.
+
+4. **Interface Segregation Principle (ISP):**
+  - The interfaces `CarService` and `ProductService` are designed to include only the methods relevant to their domain, so clients only depend on what they need.
+
+5. **Dependency Inversion Principle (DIP):**
+  - `CarController` now depends on the `CarService` interface rather than a concrete implementation like `CarServiceImpl`.
+  - This decouples high-level modules (controllers) from low-level modules (service implementations), making the system easier to test and extend.
+
+## Reflection
+
+### 1. SOLID Principles Applied
+I have implemented the following SOLID principles in this project:
+- **Single Responsibility Principle (SRP):** Each class now has only one responsibility. For example, the `CarController` handles only Car-related HTTP requests, without mixing responsibilities from product-related functionality.
+- **Open/Closed Principle (OCP):** The system is designed to be open for extension but closed for modification. By using service interfaces such as `CarService`, additional functionalities can be added by creating new implementations without altering the existing code.
+- **Liskov Substitution Principle (LSP):** By removing inheritance between `CarController` and `ProductController`, each controller operates independently. This ensures that replacing or extending controllers does not alter the expected behavior of the application.
+- **Interface Segregation Principle (ISP):** The service interfaces (`CarService` and `ProductService`) contain only the methods relevant to their respective domains, ensuring that clients only need to know the functionality they require.
+- **Dependency Inversion Principle (DIP):** High-level modules (controllers) now depend on abstractions (service interfaces) rather than on concrete implementations. For example, `CarController` depends on `CarService` instead of `CarServiceImpl`.
+
+### 2. Advantages of Applying SOLID Principles
+- **SRP:**
+  - *Advantage:* Simplifies maintenance and testing by ensuring each class has a clear, single responsibility. For instance, if the business logic for Car management changes, only the `CarController` and `CarService` need to be updated without affecting other parts of the system.
+- **OCP:**
+  - *Advantage:* Allows the codebase to be easily extended. If a new type of vehicle needs to be supported, a new service and controller can be added without modifying the existing, stable code. This minimizes regression risks.
+- **LSP:**
+  - *Advantage:* Guarantees that subclasses can replace their parent classes without breaking the application. With independent controllers, changes or extensions in one module do not impact the functionality of others, leading to a more robust system.
+- **ISP:**
+  - *Advantage:* Reduces unnecessary dependencies. Clients only interact with methods that are relevant to them, which improves code readability and maintainability. This leads to a cleaner design and easier future modifications.
+- **DIP:**
+  - *Advantage:* Enhances flexibility and testability by decoupling high-level modules from low-level implementations. By programming against interfaces, the application can easily switch to a different implementation (for example, for unit testing with mocks) without altering the overall design.
+
+### 3. Disadvantages of Not Applying SOLID Principles
+- **Without SRP:**
+  - *Disadvantage:* Classes that handle multiple responsibilities become difficult to maintain and test. For example, if `CarController` also managed product functionality, a change in product logic could inadvertently break Car operations.
+- **Without OCP:**
+  - *Disadvantage:* Every change or new feature would require modification of existing classes, leading to a fragile codebase prone to bugs and regressions. The code would be less modular, making future extensions challenging.
+- **Without LSP:**
+  - *Disadvantage:* Subclasses might not work as expected when substituted for their parent classes. This could result in inconsistent behavior and bugs that are hard to trace, reducing the reliability of the application.
+- **Without ISP:**
+  - *Disadvantage:* Clients would be forced to depend on large interfaces containing irrelevant methods, resulting in unnecessary coupling and complexity. This not only makes the code harder to understand but also increases the risk of unintended side effects when changes occur.
+- **Without DIP:**
+  - *Disadvantage:* High-level modules would be tightly coupled to low-level modules, making the system inflexible and difficult to test. Changes in low-level implementations would ripple through the entire system, leading to a less maintainable and more error-prone codebase.
