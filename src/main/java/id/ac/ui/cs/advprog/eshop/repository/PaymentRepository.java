@@ -4,38 +4,36 @@ package id.ac.ui.cs.advprog.eshop.repository;
 import id.ac.ui.cs.advprog.eshop.model.Payment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 public class PaymentRepository {
 
-    private final List<Payment> payments = new ArrayList<>();
+    private final Map<String, Payment> paymentMap = new HashMap<>();
 
     /**
-     * Saves a new Payment to the repository.
-     * @param payment the Payment object to save.
+     * Saves the Payment object.
+     * @param payment the Payment to save.
      */
     public void save(Payment payment) {
-        payments.add(payment);
+        paymentMap.put(payment.getPaymentId(), payment);
     }
 
     /**
      * Retrieves a Payment by its unique ID.
      * @param paymentId the ID of the Payment.
-     * @return the matching Payment, or null if not found.
+     * @return the Payment, or null if not found.
      */
     public Payment getPaymentById(String paymentId) {
-        Optional<Payment> result = payments.stream()
-                .filter(p -> p.getPaymentId().equals(paymentId))
-                .findFirst();
-        return result.orElse(null);
+        return paymentMap.get(paymentId);
     }
 
     /**
      * Returns a list of all stored Payment objects.
-     * @return a new list containing all Payments.
+     * @return list of Payments.
      */
     public List<Payment> getAllPayments() {
-        return new ArrayList<>(payments);
+        return new ArrayList<>(paymentMap.values());
     }
 }
