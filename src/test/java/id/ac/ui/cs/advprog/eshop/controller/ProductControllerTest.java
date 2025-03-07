@@ -121,7 +121,7 @@ class ProductControllerTest {
         String viewName = productController.deleteProduct(productId);
 
         // Then
-        assertEquals("productList", viewName);
+        assertEquals("ProductList", viewName);
         verify(productService).delete(productId);
         verifyNoMoreInteractions(productService);
     }

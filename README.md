@@ -153,3 +153,50 @@ I have implemented the following SOLID principles in this project:
   - *Disadvantage:* Clients would be forced to depend on large interfaces containing irrelevant methods, resulting in unnecessary coupling and complexity. This not only makes the code harder to understand but also increases the risk of unintended side effects when changes occur.
 - **Without DIP:**
   - *Disadvantage:* High-level modules would be tightly coupled to low-level modules, making the system inflexible and difficult to test. Changes in low-level implementations would ripple through the entire system, leading to a less maintainable and more error-prone codebase.
+
+
+# Tutorial 4
+
+## Reflection
+
+### 1. Reflection on TDD Flow (Based on Percival, 2017)
+
+I followed a Test-Driven Development (TDD) workflow in this exercise:
+
+- Red: I started by writing failing tests that expressed the desired functionality or edge cases (e.g., empty products, invalid status).
+- Green: I then wrote just enough implementation code to make these tests pass.
+- Refactor: After the tests passed, I refactored both the production code and test code where necessary for clarity and maintainability.
+
+Was the TDD flow useful enough?
+
+Yes,t he TDD cycle helped me think through the requirements and keep my focus on small, incremental steps. I caught potential edge cases (like an empty product list or invalid status) earlier than I might have otherwise.
+
+What could be improved? 
+
+Next time, I plan to:
+- Write more tests around boundary conditions (e.g., product quantity being zero or negative).
+- Ensure every piece of refactoring is accompanied by updated or additional tests if needed.
+- Use a continuous integration (CI) setup to run tests automatically for better feedback loops.
+
+### 2. Reflection on F.I.R.S.T. Principles
+
+The F.I.R.S.T. principles for unit tests are:
+
+- Fast: Tests should run quickly.
+- Independent (or Isolated): Tests should not depend on each other’s state.
+- Repeatable: Tests should yield the same results every time, no matter the environment.
+- Self-validating: Tests should provide a clear pass/fail outcome.
+- Timely: Tests should be written at the right time (ideally, during or before development).
+
+Have the tests followed these principles?
+
+- Fast: The tests currently run quickly because they operate on small sets of data in memory.
+- Independent: Each test sets up its own data (or clears it) so that the tests do not interfere with one another.
+- Repeatable: Because the tests do not depend on external systems (like a database or network calls) and rely on in-memory lists, they are repeatable in any environment.
+- Self-validating: Each test uses assertEquals or assertThrows, providing a clear pass/fail result without manual inspection.
+- Timely: We wrote these tests as we developed the code (TDD), so they guided the implementation.
+
+What could be improved?
+
+- I can add more explicit test cases for corner scenarios (e.g., negative quantities, extremely large numbers) to strengthen the reliability of these tests.
+- As the project grows, I might incorporate mocking frameworks for more complex dependencies, keeping tests both fast and isolated.
