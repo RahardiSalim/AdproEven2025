@@ -1,194 +1,141 @@
+// File: src/test/java/id/ac/ui/cs/advprog/eshop/model/PaymentModelTest.java
 package id.ac.ui.cs.advprog.eshop.model;
 
 import id.ac.ui.cs.advprog.eshop.enums.OrderStatus;
-import id.ac.ui.cs.advprog.eshop.enums.PaymentMethod;
-import id.ac.ui.cs.advprog.eshop.enums.PaymentStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.Before;
-
-import java.util.Arrays;
-import static org.junit.Assert.*;
 
 public class PaymentTest {
 
-    private PaymentService paymentService;
-    private PaymentRepository paymentRepository;
+    private Map<String, String> voucherInfo;
+    private Map<String, String> codInfo;
+    private Order sampleOrder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        paymentRepository = new PaymentRepository();
-        paymentService = new PaymentService(paymentRepository);
-    }
+        // Prepare valid voucher info.
+        voucherInfo = new HashMap<>();
+        voucherInfo.put("voucherCode", "ESHOP1234ABC5678");
 
-    // Helper method to create an order
-    private Order createOrder(String orderId, String status) {
-        return new Order(orderId, Arrays.asList(new Product("product1", 100)), System.currentTimeMillis(), "author", status);
-    }
+        // Prepare valid Cash on Delivery info.
+        codInfo = new HashMap<>();
+        codInfo.put("address", "123 Main Street");
+        codInfo.put("deliveryFee", "5000");
 
-    // Testing Payment Model Creation
-    @Test
-    public void testPaymentModelCreation() {
-        Order order = createOrder("1", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "ESHOP1234ABC5678");
+        // Create a sample order with one product.
+        List<Product> products = new ArrayList<>();
+        Product prod = new Product();
+        prod.setProductId("prod-001");
+        prod.setProductName("Sample Product");
+        prod.setProductQuantity(5);
+        products.add(prod);
 
-        Payment payment = new Payment("1", "Voucher", "SUCCESS", paymentData, order);
-
-        // Assert that the payment object is created correctly
-        assertNotNull(payment);
-        assertEquals("1", payment.getId());
-        assertEquals("Voucher", payment.getMethod());
-        assertEquals("SUCCESS", payment.getStatus());
-        assertEquals(order, payment.getOrder());
-    }
-
-    // Testing Payment by Voucher
-    @Test
-    public void testPaymentByVoucherValidCode() {
-        Order order = createOrder("1", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "ESHOP1234ABC5678");
-
-        Payment payment = paymentService.addPayment(order, "Voucher", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("SUCCESS", payment.getStatus());
-        assertEquals("1", payment.getOrder().getId());  // Ensure payment is linked to the correct order
+        sampleOrder = Order.builder()
+                .id("order-001")
+                .products(products)
+                .orderTime(1708560000L)
+                .author("Tester")
+                .status(OrderStatus.WAITING_PAYMENT.getValue())
+                .build();
     }
 
     @Test
-    public void testPaymentByVoucherInvalidCode() {
-        Order order = createOrder("2", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "INVALIDCODE123");
-
-        Payment payment = paymentService.addPayment(order, "Voucher", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("REJECTED", payment.getStatus());
-    }
-
-    // Testing Cash on Delivery
-    @Test
-    public void testPaymentByCashOnDeliveryValidData() {
-        Order order = createOrder("3", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("address", "123 Main St");
-        paymentData.put("deliveryFee", "10");
-
-        Payment payment = paymentService.addPayment(order, "Cash on Delivery", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("SUCCESS", payment.getStatus());
+    public void testIdGenerationOnCreation() {
+        // Verify that a Payment instance auto-generates a non-null ID.
+        Payment payment = new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(),
+                PaymentStatus.WAITING.getValue(), codInfo, sampleOrder);
+        assertNotNull(payment.getPaymentId(), "Payment ID should be auto-generated and not null.");
     }
 
     @Test
-    public void testPaymentByCashOnDeliveryMissingAddress() {
-        Order order = createOrder("4", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("deliveryFee", "10");
-
-        Payment payment = paymentService.addPayment(order, "Cash on Delivery", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("REJECTED", payment.getStatus());
+    public void testRejectsUnknownPaymentMethod() {
+        // An invalid payment method should throw an exception.
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                new Payment("temp-id", "UNKNOWN_METHOD", PaymentStatus.WAITING.getValue(), codInfo, sampleOrder)
+        );
+        assertTrue(ex.getMessage().contains("Invalid payment method"), "Unknown payment method should be rejected.");
     }
 
     @Test
-    public void testPaymentByCashOnDeliveryMissingFee() {
-        Order order = createOrder("5", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("address", "123 Main St");
-
-        Payment payment = paymentService.addPayment(order, "Cash on Delivery", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("REJECTED", payment.getStatus());
-    }
-
-    // Testing Bank Transfer
-    @Test
-    public void testPaymentByBankTransferValidData() {
-        Order order = createOrder("6", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("bankName", "Bank A");
-        paymentData.put("referenceCode", "123456");
-
-        Payment payment = paymentService.addPayment(order, "Bank Transfer", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("SUCCESS", payment.getStatus());
+    public void testNullOrderNotAccepted() {
+        // Payment creation should fail if the order is null.
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(), PaymentStatus.WAITING.getValue(), codInfo, null)
+        );
+        assertTrue(ex.getMessage().contains("Order cannot be null"), "A null order should cause an exception.");
     }
 
     @Test
-    public void testPaymentByBankTransferMissingBankName() {
-        Order order = createOrder("7", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("referenceCode", "123456");
-
-        Payment payment = paymentService.addPayment(order, "Bank Transfer", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("REJECTED", payment.getStatus());
+    public void testEmptyPaymentDataIsInvalid() {
+        // An empty payment data map should not be accepted.
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+                new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(), PaymentStatus.WAITING.getValue(), new HashMap<>(), sampleOrder)
+        );
+        assertTrue(ex.getMessage().contains("Payment data cannot be empty"), "Empty payment data must be rejected.");
     }
 
     @Test
-    public void testPaymentByBankTransferMissingReferenceCode() {
-        Order order = createOrder("8", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("bankName", "Bank A");
-
-        Payment payment = paymentService.addPayment(order, "Bank Transfer", paymentData);
-
-        assertNotNull(payment);
-        assertEquals("REJECTED", payment.getStatus());
-    }
-
-    // Testing Payment Status Update
-    @Test
-    public void testSetPaymentStatusToSuccess() {
-        Order order = createOrder("9", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "ESHOP1234ABC5678");
-
-        Payment payment = paymentService.addPayment(order, "Voucher", paymentData);
-        paymentService.setStatus(payment, "SUCCESS");
-
-        assertEquals("SUCCESS", payment.getStatus());
-        assertEquals("SUCCESS", payment.getOrder().getStatus());  // Ensure order status is updated to SUCCESS
+    public void testValidCODMaintainsWaitingStatus() {
+        // A valid COD payment should keep its initial WAITING status.
+        Payment payment = new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(),
+                PaymentStatus.WAITING.getValue(), codInfo, sampleOrder);
+        assertEquals(PaymentStatus.WAITING.getValue(), payment.getPaymentStatus(),
+                "Valid cash on delivery payment should remain in WAITING status.");
     }
 
     @Test
-    public void testSetPaymentStatusToRejected() {
-        Order order = createOrder("10", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "INVALIDCODE123");
-
-        Payment payment = paymentService.addPayment(order, "Voucher", paymentData);
-        paymentService.setStatus(payment, "REJECTED");
-
-        assertEquals("FAILED", payment.getStatus());
-        assertEquals("FAILED", payment.getOrder().getStatus());  // Ensure order status is updated to FAILED
+    public void testInvalidCODDataResultsInRejection() {
+        // A COD payment with missing essential info should be marked as REJECTED.
+        Map<String, String> incompleteCodInfo = new HashMap<>(codInfo);
+        incompleteCodInfo.put("address", ""); // Simulate missing address.
+        Payment payment = new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(),
+                PaymentStatus.WAITING.getValue(), incompleteCodInfo, sampleOrder);
+        assertEquals(PaymentStatus.REJECTED.getValue(), payment.getPaymentStatus(),
+                "Incomplete COD data should set status to REJECTED.");
     }
 
-    // Testing Edge Case for Payment Data
     @Test
-    public void testInvalidVoucherCodeFormat() {
-        Order order = createOrder("11", "WAITING_PAYMENT");
-        Map<String, String> paymentData = new HashMap<>();
-        paymentData.put("voucherCode", "ESHOPABCD1234");
+    public void testVoucherPaymentValidCodeDoesNotAutoReject() {
+        // A payment with a valid voucher code should not be auto-rejected.
+        Payment payment = new Payment("temp-id", PaymentMethod.VOUCHER_CODE.getValue(),
+                PaymentStatus.WAITING.getValue(), voucherInfo, sampleOrder);
+        assertEquals(PaymentStatus.WAITING.getValue(), payment.getPaymentStatus(),
+                "A valid voucher code should leave the status unchanged.");
+    }
 
-        Payment payment = paymentService.addPayment(order, "Voucher", paymentData);
-        assertEquals("REJECTED", payment.getStatus());
+    @Test
+    public void testVoucherPaymentInvalidCodeLeadsToRejection() {
+        // Change the voucher code so it becomes invalid.
+        Map<String, String> invalidVoucher = new HashMap<>(voucherInfo);
+        invalidVoucher.put("voucherCode", "ESHOP1234ABC567X"); // deliberately invalid.
+        Payment payment = new Payment("temp-id", PaymentMethod.VOUCHER_CODE.getValue(),
+                PaymentStatus.WAITING.getValue(), invalidVoucher, sampleOrder);
+        assertEquals(PaymentStatus.REJECTED.getValue(), payment.getPaymentStatus(),
+                "An invalid voucher code should cause the payment to be rejected.");
+    }
+
+    @Test
+    public void testStatusUpdateFunctionality() {
+        // Verify that updating the payment status works as expected.
+        Payment payment = new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(),
+                PaymentStatus.WAITING.getValue(), codInfo, sampleOrder);
+        payment.setPaymentStatus(PaymentStatus.SUCCESS.getValue());
+        assertEquals(PaymentStatus.SUCCESS.getValue(), payment.getPaymentStatus(),
+                "Payment status should update to SUCCESS.");
+    }
+
+    @Test
+    public void testPaymentDataReferenceIntegrity() {
+        // Ensure that modifying the retrieved payment data map affects the internal state.
+        Payment payment = new Payment("temp-id", PaymentMethod.CASH_ON_DELIVERY.getValue(),
+                PaymentStatus.WAITING.getValue(), codInfo, sampleOrder);
+        Map<String, String> retrievedData = payment.getPaymentData();
+        retrievedData.put("note", "extra info");
+        assertEquals("extra info", payment.getPaymentData().get("note"),
+                "Changes to the payment data map should be reflected in the payment object.");
     }
 }
