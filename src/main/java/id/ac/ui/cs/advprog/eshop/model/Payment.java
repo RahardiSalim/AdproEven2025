@@ -1,4 +1,7 @@
+// File: src/main/java/id/ac/ui/cs/advprog/eshop/model/Payment.java
 package id.ac.ui.cs.advprog.eshop.model;
+import id.ac.ui.cs.advprog.eshop.enums.PaymentMethod;
+import id.ac.ui.cs.advprog.eshop.enums.PaymentStatus;
 
 import java.util.Map;
 import java.util.UUID;
@@ -6,6 +9,7 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
 
 @Getter
 @Setter
@@ -28,8 +32,8 @@ public class Payment {
             throw new IllegalArgumentException("Payment data cannot be empty");
         }
         // Validate payment method
-        if (!paymentMethod.equals("CASH_ON_DELIVERY") &&
-                !paymentMethod.equals("VOUCHER_CODE")) {
+        if (!paymentMethod.equals(PaymentMethod.CASH_ON_DELIVERY.getValue()) &&
+                !paymentMethod.equals(PaymentMethod.VOUCHER_CODE.getValue())) {
             throw new IllegalArgumentException("Invalid payment method");
         }
 
@@ -40,21 +44,21 @@ public class Payment {
         this.paymentData = paymentData;
 
         // Process based on payment method:
-        if (paymentMethod.equals("CASH_ON_DELIVERY")) {
+        if (paymentMethod.equals(PaymentMethod.CASH_ON_DELIVERY.getValue())) {
             // For Cash on Delivery, require "address" and "deliveryFee" to be non-empty.
             String address = paymentData.get("address");
             String deliveryFee = paymentData.get("deliveryFee");
             if (address == null || address.trim().isEmpty() ||
                     deliveryFee == null || deliveryFee.trim().isEmpty()) {
-                this.paymentStatus = "REJECTED";
+                this.paymentStatus = PaymentStatus.REJECTED.getValue();
             } else {
                 this.paymentStatus = paymentStatus;
             }
-        } else if (paymentMethod.equals("VOUCHER_CODE")) {
+        } else if (paymentMethod.equals(PaymentMethod.VOUCHER_CODE.getValue())) {
             // For Voucher Code, validate the code. If invalid, mark as REJECTED.
             String voucherCode = paymentData.get("voucherCode");
             if (!isValidVoucherCode(voucherCode)) {
-                this.paymentStatus = "REJECTED";
+                this.paymentStatus = PaymentStatus.REJECTED.getValue();
             } else {
                 this.paymentStatus = paymentStatus;
             }
