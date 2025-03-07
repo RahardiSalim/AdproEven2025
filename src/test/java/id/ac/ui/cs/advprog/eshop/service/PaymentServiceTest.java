@@ -24,7 +24,7 @@ public class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService();
+        paymentService = new PaymentServiceImpl();
 
         // Create a sample order with one product.
         List<Product> products = new ArrayList<>();
